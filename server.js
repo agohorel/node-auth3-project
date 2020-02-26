@@ -43,15 +43,19 @@ server.post("/login", async (req, res) => {
   }
 });
 
-server.get("/users", validateToken, async (req, res) => {
-  try {
-    const users = await db.find();
-    res.status(200).json(users);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "server error" });
+server.get(
+  "/users",
+  [validateToken, restrictByDepartment("IT")],
+  async (req, res) => {
+    try {
+      const users = await db.find();
+      res.status(200).json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "server error" });
+    }
   }
-});
+);
 
 function generateToken(user) {
   const { username, department } = user;
@@ -76,6 +80,20 @@ function validateToken(req, res, next) {
   } else {
     res.status(400).json({ msg: "no credentials provided" });
   }
+}
+
+function restrictByDepartment(department) {
+  return (req, res, next) => {
+    if (
+      req.decodedToken &&
+      req.decodedToken.department &&
+      req.decodedToken.department.toLowerCase() === department.toLowerCase()
+    ) {
+      next();
+    } else {
+      res.status(403).json({ msg: "you are not authorized to view this page" });
+    }
+  };
 }
 
 server.listen(port, () => console.log(`server is listening on port ${port}`));
