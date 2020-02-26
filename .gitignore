@@ -3,3 +3,6 @@ node_modules/
 
 # db files
 data/*.db3
+
+# env 
+.env
