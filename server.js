@@ -43,12 +43,39 @@ server.post("/login", async (req, res) => {
   }
 });
 
+server.get("/users", validateToken, async (req, res) => {
+  try {
+    const users = await db.find();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "server error" });
+  }
+});
+
 function generateToken(user) {
   const { username, department } = user;
   const payload = { username, department };
   const options = { expiresIn: "1h" };
 
   return jwt.sign(payload, jwtSecret, options);
+}
+
+function validateToken(req, res, next) {
+  const { authorization } = req.headers;
+
+  if (authorization) {
+    jwt.verify(authorization, jwtSecret, (err, decoded) => {
+      if (err) {
+        res.status(401).json({ msg: "invalid credentials" });
+      } else {
+        req.decodedToken = decoded;
+        next();
+      }
+    });
+  } else {
+    res.status(400).json({ msg: "no credentials provided" });
+  }
 }
 
 server.listen(port, () => console.log(`server is listening on port ${port}`));

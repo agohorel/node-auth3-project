@@ -1,7 +1,7 @@
 const db = require("./dbConfig.js");
 
 function find() {
-  return db("users").select("username, department");
+  return db("users").select("username", "department");
 }
 
 function findBy(filter) {
