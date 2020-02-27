@@ -5,14 +5,12 @@ function find() {
 }
 
 function findBy(filter) {
-  return db("users")
-    .where(filter)
-    .first();
+  return db("users").where(filter);
 }
 
 async function insert(data) {
   const [id] = await db("users").insert(data);
-  return findBy({ id });
+  return findBy({ id }).first();
 }
 
 module.exports = { insert, find, findBy };

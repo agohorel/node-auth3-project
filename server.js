@@ -29,7 +29,7 @@ server.post("/register", async (req, res) => {
 server.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
-    const user = await db.findBy({ username });
+    const user = await db.findBy({ username }).first();
 
     if (user && bcrypt.compareSync(password, user.password)) {
       const token = generateToken(user);
@@ -48,7 +48,9 @@ server.get(
   [validateToken, restrictByDepartment("IT")],
   async (req, res) => {
     try {
-      const users = await db.find();
+      const users = await db.findBy({
+        department: req.decodedToken.department
+      });
       res.status(200).json(users);
     } catch (error) {
       console.error(error);
